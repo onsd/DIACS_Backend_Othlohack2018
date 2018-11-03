@@ -22,13 +22,6 @@ type Calender struct{
 }
 func main(){
 	port := os.Getenv("PORT")
-	ctx := context.Background()
-
-	// Creates a client.
-	_, err := language.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
 
 	router := gin.Default()
 	router.GET("/",getIndex)
