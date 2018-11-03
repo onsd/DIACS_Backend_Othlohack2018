@@ -9,15 +9,20 @@ import (
 	"log"
 	"net/http"
 	"database/sql"
+	"strconv"
+	"math/rand"
 )
 
-
+var LastEmotion *Emotion
 type Emotion struct {
 	UserName   string  `json:username`
 	Article    string  `json:article`
 	Emotion    float32 `json:emotion`
 	EmotionNum int     `json:emotionNum`
 	ColorCode int `json:colorCode`
+	Year int	`json:year`
+	Month int	`json:month`
+	Day int	`json:day`
 }
 
 type Calender struct {
@@ -63,6 +68,9 @@ func main() {
 	router.GET("/", getIndex)
 	router.POST("/getSentiment", getSentiment)
 	router.GET("/getCalendertest", getCalenderTest)
+	router.POST("/postforexample",postforexample)
+	//router.GET("/getCalender/:name",getCalender)
+	router.GET("/lastState",getLastState)
 	router.Run(":8080")
 }
 func CORSMiddleware() gin.HandlerFunc {
@@ -82,6 +90,13 @@ func getSentiment(c *gin.Context) {
 	//title := c.Request.Form["title"]
 	article := c.Request.Form["article"]
 	username := c.Request.Form["username"]
+	y := c.Request.Form["year"]
+	d := c.Request.Form["day"]
+	m := c.Request.Form["month"]
+	year,_ := strconv.Atoi(y[0])
+	day,_ := strconv.Atoi(d[0])
+	month,_ := strconv.Atoi(m[0])
+
 
 	ctx := context.Background()
 
@@ -112,18 +127,21 @@ func getSentiment(c *gin.Context) {
 		EmotionNum: emotionNum,
 		UserName:   username[0],
 		ColorCode: Color[emotionNum],
+		Year: year,
+		Month : month,
+		Day : day,
 	}
 
 	db,err := sql.Open("sqlite3","./test.db")
 	_, err = db.Exec(
-		`insert into dairy (user,month,day,article,emotionNum,colorCode)
-				values (?,11,1,?,?,?)`,
-			emotion.UserName, emotion.Article,emotion.EmotionNum,emotion.ColorCode)
+		`insert into dairy (user,year,month,day,article,emotionNum,colorCode)
+				values (?,?,?,?,?,?,?)`,
+			emotion.UserName,emotion.Year,emotion.Month,emotion.Day, emotion.Article,emotion.EmotionNum,emotion.ColorCode)
 	if err != nil{
 		log.Fatalf("Error : %v",err)
 	}
 
-
+	LastEmotion = emotion
 	c.JSON(200, emotion)
 }
 
@@ -163,11 +181,73 @@ func initDB() {
 		log.Fatalf("Connection Error: %v", err)
 	}
 	_, err = db.Exec(
-		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"year" int,"article" string,"emotionNum" int,"colorCode" int);
+		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"year" int,"month" int,"day" int,"article" string,"emotionNum" int,"colorCode" int);
 	`)
 	if err != nil {
 		log.Fatalf("Connection Error: %v", err)
 	}
 	db.Close()
 
+}
+
+func postforexample(c *gin.Context){
+	Color := []int{0x9999ff,0x99ccff,0x99ffff,0x99ffcc,0x99ff99,0xccff99,0xffff99,0xffcc99,0xff9999}
+
+	c.Request.ParseForm()
+	//title := c.Request.Form["title"]
+	article := c.Request.Form["article"]
+	username := c.Request.Form["username"]
+	y := c.Request.Form["year"]
+	d := c.Request.Form["day"]
+	m := c.Request.Form["month"]
+	year,_ := strconv.Atoi(y[0])
+	day,_ := strconv.Atoi(d[0])
+	month,_ := strconv.Atoi(m[0])
+
+
+
+	randint := rand.Int()
+	if 9 <= randint{
+		randint = 1
+	}
+	randfloat := rand.Float32()
+
+	emotion := &Emotion{
+		Article:    article[0],
+		Emotion:    randfloat,
+		EmotionNum: randint,
+		UserName:   username[0],
+		ColorCode: Color[randint],
+		Year: year,
+		Month : month,
+		Day : day,
+	}
+
+	db,err := sql.Open("sqlite3","./test.db")
+	defer db.Close()
+	_, err = db.Exec(
+		`insert into dairy (user,year,month,day,article,emotionNum,colorCode)
+				values (?,?,?,?,?,?,?)`,
+		emotion.UserName,emotion.Year,emotion.Month,emotion.Day, emotion.Article,emotion.EmotionNum,emotion.ColorCode)
+	if err != nil{
+		log.Fatalf("Error : %v",err)
+	}
+
+
+	LastEmotion = emotion
+	c.JSON(200, emotion)
+}
+
+/*
+func getCalender(c *gin.Context){
+	username := c.Param("username")
+	db, err := sql.Open("sqlite3", "./test.db")
+	if err !=  nil{
+
+	}
+
+}*/
+
+func getLastState(c *gin.Context){
+	c.JSON(200,LastEmotion)
 }
