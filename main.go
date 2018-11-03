@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"strconv"
 	"math/rand"
+	"fmt"
 )
 
 var LastEmotion *Emotion
@@ -28,7 +29,6 @@ type Emotion struct {
 type Calender struct {
 	Month int `json:month`
 	Day   int `json:day`
-	Color int `json:color`
 	EmotionNum int `json:emotionNum`
 }
 
@@ -70,7 +70,7 @@ func main() {
 	router.POST("/getSentiment", getSentiment)
 	router.GET("/getCalendertest", getCalenderTest)
 	router.POST("/postforexample",postforexample)
-	//router.GET("/getCalender/:name",getCalender)
+	router.GET("/getCalender/:name",getCalender)
 	router.GET("/lastState",getLastState)
 	router.Run(":8080")
 }
@@ -154,19 +154,19 @@ func getCalenderTest(c *gin.Context) {
 	var calender1 Calender = Calender{
 		Month: 11,
 		Day:   1,
-		Color: 12648430, //#c0ffee
+		//Color: 12648430, //#c0ffee
 		EmotionNum: 5,
 	}
 	var calender2 Calender = Calender{
 		Month: 11,
 		Day:   2,
-		Color: 15789568, //f0ee00
+		//Color: 15789568, //f0ee00
 		EmotionNum: 4,
 	} // }
 	var calender3 Calender = Calender{
 		Month: 11,
 		Day:   3,
-		Color: 11239568, //f0ee00
+		//Color: 11239568, //f0ee00
 		EmotionNum: 6,
 	}
 
@@ -242,18 +242,41 @@ func postforexample(c *gin.Context){
 	c.JSON(200, emotion)
 }
 
-/*
+
 func getCalender(c *gin.Context){
-	username := c.Param("username")
+	username := c.Param("name")
+	fmt.Println(username)
 	db, err := sql.Open("sqlite3", "./test.db")
+	defer db.Close()
 	if err !=  nil{
 		log.Fatalf("Open sqlite3 Error: %v",err)
 	}
-	res, err := db.Exec("SELECT * FROM DAIRY WHERE user = ?",username)
-
-
+	month := 11
+	//	`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"year" int,"month" int,"day" int,"article" string,"emotionNum" int,"colorCode" int);
+	rows, err := db.Query("SELECT * FROM DAIRY WHERE user = ? and month = ?",username,month)
+	defer rows.Close()
+	var calenders []Calender
+	for rows.Next(){
+		var day int
+		var emotionNum int
+		var user string
+		var month int
+		var article string
+		var colorCode int
+		var year int
+		if err := rows.Scan(&user,&year,&month,&day,&article,&emotionNum,&colorCode);err != nil{
+			log.Fatal("rows.Scan()",err)
+			return
+		}
+		calender := Calender{
+			Month : month,
+			Day: day,
+			EmotionNum: emotionNum,
+		}
+		calenders = append(calenders,calender)
+	}
+	c.JSON(200,calenders)
 }
-*/
 
 func getLastState(c *gin.Context){
 	c.JSON(200,LastEmotion)
