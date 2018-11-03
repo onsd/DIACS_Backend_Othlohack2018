@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/context"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 	"os"
+	"net/http"
 )
 
 type Emotion struct{
@@ -18,6 +19,7 @@ func main(){
 	port := os.Getenv("PORT")
 
 	router := gin.Default()
+	router.GET("/",getIndex)
 	router.POST("/sentiment",getSentiment)
 	router.Run(":"+ port)
 }
@@ -65,3 +67,6 @@ func getSentiment(c *gin.Context){
 }
 
 
+func getIndex(c *gin.Context){
+	c.String(http.StatusAccepted,"hello")
+}
