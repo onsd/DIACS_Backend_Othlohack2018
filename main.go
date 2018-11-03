@@ -252,7 +252,7 @@ func getCalender(c *gin.Context){
 	if err !=  nil{
 		log.Fatalf("Open sqlite3 Error: %v",err)
 	}
-	month := 11
+	month := 10
 	//	`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"year" int,"month" int,"day" int,"article" string,"emotionNum" int,"colorCode" int);
 	rows, err := db.Query("SELECT * FROM DAIRY WHERE user = ? and month = ?",username,month)
 	defer rows.Close()
