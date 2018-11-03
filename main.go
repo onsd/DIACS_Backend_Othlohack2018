@@ -6,7 +6,6 @@ import (
 	"cloud.google.com/go/language/apiv1"
 	"golang.org/x/net/context"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
-	"os"
 	"net/http"
 )
 
@@ -21,13 +20,11 @@ type Calender struct{
 	Color int `json:color`
 }
 func main(){
-	port := os.Getenv("PORT")
-
 	router := gin.Default()
 	router.GET("/",getIndex)
-	router.POST("/sentiment",getSentiment)
+	router.POST("/getSentiment",getSentiment)
 	router.GET("/getCalendertest",getCalenderTest)
-	router.Run(":"+ port)
+	router.Run(":8080")
 }
 
 func getSentiment(c *gin.Context){
