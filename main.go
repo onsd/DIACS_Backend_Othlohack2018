@@ -116,9 +116,9 @@ func getSentiment(c *gin.Context) {
 
 	db,err := sql.Open("sqlite3","./test.db")
 	_, err = db.Exec(
-		`insert into dairy (user,month,day,article,emotionNum)
-				values (?,11,1,?,?)`,
-			emotion.UserName, emotion.Article,emotion.EmotionNum)
+		`insert into dairy (user,month,day,article,emotionNum,colorCode)
+				values (?,11,1,?,?,?)`,
+			emotion.UserName, emotion.Article,emotion.EmotionNum,emotion.ColorCode)
 	if err != nil{
 		log.Fatalf("Error : %v",err)
 	}
@@ -163,7 +163,7 @@ func initDB() {
 		log.Fatalf("Connection Error: %v", err)
 	}
 	_, err = db.Exec(
-		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"year" int,"article" string,"emotionNum" int);
+		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"year" int,"article" string,"emotionNum" int,"colorCode" int);
 	`)
 	if err != nil {
 		log.Fatalf("Connection Error: %v", err)
