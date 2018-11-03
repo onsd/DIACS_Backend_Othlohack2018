@@ -11,11 +11,13 @@ import (
 	"database/sql"
 )
 
+
 type Emotion struct {
 	UserName   string  `json:username`
 	Article    string  `json:article`
 	Emotion    float32 `json:emotion`
 	EmotionNum int     `json:emotionNum`
+	ColorCode int `json:colorCode`
 }
 
 type Calender struct {
@@ -74,6 +76,8 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 func getSentiment(c *gin.Context) {
+	Color := []int{0x9999ff,0x99ccff,0x99ffff,0x99ffcc,0x99ff99,0xccff99,0xffff99,0xffcc99,0xff9999}
+
 	c.Request.ParseForm()
 	//title := c.Request.Form["title"]
 	article := c.Request.Form["article"]
@@ -99,26 +103,27 @@ func getSentiment(c *gin.Context) {
 	})
 	if err != nil {
 		c.String(http.StatusPreconditionFailed, "failed")
-
 	}
 
-	//fmt.Printf("Text: %v\n", article)
-	//fmt.Printf("Sentiment: %v" ,sentiment.DocumentSentiment.Score)
-
-	//jsonStr := `{"channel":"` + channel + `","username":"` + name + `","text":"` + str(lending) + `"}`
-	//var emotion Emotion
 	emotionNum := getColor(sentiment.DocumentSentiment.Score)
 	emotion := &Emotion{
 		Article:    article[0],
 		Emotion:    sentiment.DocumentSentiment.Score,
 		EmotionNum: emotionNum,
 		UserName:   username[0],
+		ColorCode: Color[emotionNum],
 	}
-	/*
-		db,err := sql.Open("sqlite3","./test.db")
-		_, _ := db.Exec(
-			`insert into dairy (user,month,dai,article,emotionNum) value `)
-	*/
+
+	db,err := sql.Open("sqlite3","./test.db")
+	_, err = db.Exec(
+		`insert into dairy (user,month,day,article,emotionNum)
+				values (?,11,1,?,?)`,
+			emotion.UserName, emotion.Article,emotion.EmotionNum)
+	if err != nil{
+		log.Fatalf("Error : %v",err)
+	}
+
+
 	c.JSON(200, emotion)
 }
 
@@ -158,7 +163,7 @@ func initDB() {
 		log.Fatalf("Connection Error: %v", err)
 	}
 	_, err = db.Exec(
-		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"article" string,"emotionNum" int);
+		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"year" int,"article" string,"emotionNum" int);
 	`)
 	if err != nil {
 		log.Fatalf("Connection Error: %v", err)
