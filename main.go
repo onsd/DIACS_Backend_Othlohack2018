@@ -15,12 +15,19 @@ type Emotion struct{
 	Emotion float32 `json:emotion`
 }
 
+type Calender struct{
+	Month int `json:month`
+	Day int `json:day`
+	//date time.Time `json:date`
+	color int `json:color` //#c0ffee
+}
 func main(){
 	port := os.Getenv("PORT")
 
 	router := gin.Default()
 	router.GET("/",getIndex)
 	router.POST("/sentiment",getSentiment)
+	router.GET("/getCalender",getCalender)
 	router.Run(":"+ port)
 }
 
@@ -68,5 +75,24 @@ func getSentiment(c *gin.Context){
 
 
 func getIndex(c *gin.Context){
+	
 	c.String(http.StatusAccepted,"hello")
+}
+func getCalender(c *gin.Context){
+	var calender1 Calender = Calender{
+		Month:11,
+		Day:1,
+		color:12648430, //#c0ffee
+	}
+	var calender2 Calender = Calender{
+		Month:11,
+		Day:2,
+		color:15789568, //f0ee00
+	}
+	var calender []Calender
+	calender = append(calender,calender1)
+	calender = append(calender,calender2)
+	//b, _ := json.Marshal(calender)
+	//fmt.Printf("%s\n",b)
+	c.JSON(200,calender)
 }
