@@ -54,7 +54,8 @@ func getSentiment(c *gin.Context){
 		EncodingType: languagepb.EncodingType_UTF8,
 	})
 	if err != nil {
-		log.Fatalf("Failed to analyze text: %v", err)
+		c.String(http.StatusPreconditionFailed,"failed")
+
 	}
 
 	//fmt.Printf("Text: %v\n", article)
