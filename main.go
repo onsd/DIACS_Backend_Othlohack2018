@@ -7,9 +7,12 @@ import (
 	"golang.org/x/net/context"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 	"net/http"
+	"database/sql"
 )
 
+
 type Emotion struct{
+	UserName string `json:username`
 	Article string `json:article`
 	Emotion float32 `json:emotion`
 	EmotionNum int `json:emotionNum`
@@ -20,7 +23,7 @@ type Calender struct{
 	Day int `json:day`
 	Color int `json:color`
 }
-type Color int
+
 
 func getColor(f float32) int{
 	if -1.0 < f && f <= -0.75{
@@ -50,18 +53,34 @@ func getColor(f float32) int{
 	}
 	return 4 //f == 0
 }
+
 func main(){
+	initDB()
+
+
 	router := gin.Default()
+	router.Use(CORSMiddleware())
 	router.GET("/",getIndex)
 	router.POST("/getSentiment",getSentiment)
 	router.GET("/getCalendertest",getCalenderTest)
 	router.Run(":8080")
 }
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
 
+		c.Writer.Header().Set("Content-Type", "application/json")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		c.Next()
+	}
+}
 func getSentiment(c *gin.Context){
 	c.Request.ParseForm()
 	//title := c.Request.Form["title"]
 	article := c.Request.Form["article"]
+	username := c.Request.Form["username"]
+
 
 	ctx := context.Background()
 
@@ -96,10 +115,13 @@ func getSentiment(c *gin.Context){
 		Article : article[0],
 		Emotion : sentiment.DocumentSentiment.Score,
 		EmotionNum: emotionNum,
-
+		UserName: username[0],
 	}
-//	b ,_ := json.Marshal(emotion)
-
+/*
+	db,err := sql.Open("sqlite3","./test.db")
+	_, _ := db.Exec(
+		`insert into dairy (user,month,dai,article,emotionNum) value `)
+*/
 	c.JSON(200,emotion)
 }
 
@@ -132,4 +154,19 @@ func getCalenderTest(c *gin.Context){
 	//b, _ := json.Marshal(calender)
 	//fmt.Printf("%s\n",b)
 	c.JSON(200,calender)
+}
+
+func initDB(){
+	db,err := sql.Open("sqlite3","./test.db")
+	if err != nil{
+		log.Fatalf("Connection Error: %v",err)
+	}
+	_, err = db.Exec(
+		`CREATE TABLE IF NOT EXISTS "Dairy" ("user" string,"month" int,"day" int,"article" string,"emotionNum" int);
+	`)
+	if err != nil{
+		log.Fatalf("Connection Error: %v",err)
+	}
+	db.Close()
+
 }
