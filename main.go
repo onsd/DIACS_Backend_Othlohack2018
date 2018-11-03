@@ -29,6 +29,7 @@ type Calender struct {
 	Month int `json:month`
 	Day   int `json:day`
 	Color int `json:color`
+	EmotionNum int `json:emotionNum`
 }
 
 func getColor(f float32) int {
@@ -154,16 +155,19 @@ func getCalenderTest(c *gin.Context) {
 		Month: 11,
 		Day:   1,
 		Color: 12648430, //#c0ffee
+		EmotionNum: 5,
 	}
 	var calender2 Calender = Calender{
 		Month: 11,
 		Day:   2,
 		Color: 15789568, //f0ee00
+		EmotionNum: 4,
 	} // }
 	var calender3 Calender = Calender{
 		Month: 11,
 		Day:   3,
 		Color: 11239568, //f0ee00
+		EmotionNum: 6,
 	}
 
 	var calender []Calender
@@ -238,15 +242,17 @@ func postforexample(c *gin.Context){
 	c.JSON(200, emotion)
 }
 
-/*
+
 func getCalender(c *gin.Context){
 	username := c.Param("username")
 	db, err := sql.Open("sqlite3", "./test.db")
 	if err !=  nil{
-
+		log.Fatalf("Open sqlite3 Error: %v",err)
 	}
+	res, err := db.Exec("SELECT * FROM DAIRY WHERE user = ?",username)
 
-}*/
+
+}
 
 func getLastState(c *gin.Context){
 	c.JSON(200,LastEmotion)
