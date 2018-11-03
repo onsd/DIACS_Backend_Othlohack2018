@@ -242,7 +242,7 @@ func postforexample(c *gin.Context){
 	c.JSON(200, emotion)
 }
 
-
+/*
 func getCalender(c *gin.Context){
 	username := c.Param("username")
 	db, err := sql.Open("sqlite3", "./test.db")
@@ -253,6 +253,7 @@ func getCalender(c *gin.Context){
 
 
 }
+*/
 
 func getLastState(c *gin.Context){
 	c.JSON(200,LastEmotion)
