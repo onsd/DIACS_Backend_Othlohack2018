@@ -30,6 +30,7 @@ type Calender struct {
 	Month int `json:month`
 	Day   int `json:day`
 	EmotionNum int `json:emotionNum`
+	ColorCode int `json:colorcode`
 }
 
 func getColor(f float32) int {
@@ -272,6 +273,7 @@ func getCalender(c *gin.Context){
 			Month : month,
 			Day: day,
 			EmotionNum: emotionNum,
+			ColorCode: colorCode,
 		}
 		calenders = append(calenders,calender)
 	}
