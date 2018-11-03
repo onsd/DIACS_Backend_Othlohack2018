@@ -12,12 +12,43 @@ import (
 type Emotion struct{
 	Article string `json:article`
 	Emotion float32 `json:emotion`
+	EmotionNum int `json:emotionNum`
 }
 
 type Calender struct{
 	Month int `json:month`
 	Day int `json:day`
 	Color int `json:color`
+}
+type Color int
+
+func getColor(f float32) int{
+	if -1.0 < f && f <= -0.75{
+		return 0
+	}
+	if -0.75 < f && f <= -0.5{
+		return 1
+	}
+	if -0.5 < f && f < -0.25{
+		return 2
+	}
+	if -0.25 < f && f < 0.0{
+		return 3
+	}
+
+	if 0.0 < f && f <= 0.25{
+		return 5
+	}
+	if 0.25 < f && f <= 0.5{
+		return 6
+	}
+	if 0.5 < f && f <= 0.75{
+		return 7
+	}
+	if 0.75 < f && f <= 1.0{
+		return 8
+	}
+	return 4 //f == 0
 }
 func main(){
 	router := gin.Default()
@@ -60,9 +91,11 @@ func getSentiment(c *gin.Context){
 
 	//jsonStr := `{"channel":"` + channel + `","username":"` + name + `","text":"` + str(lending) + `"}`
 	//var emotion Emotion
+	emotionNum := getColor(sentiment.DocumentSentiment.Score)
 	emotion := &Emotion {
 		Article : article[0],
 		Emotion : sentiment.DocumentSentiment.Score,
+		EmotionNum: emotionNum,
 
 	}
 //	b ,_ := json.Marshal(emotion)
