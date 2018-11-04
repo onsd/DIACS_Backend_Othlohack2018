@@ -14,6 +14,7 @@ import (
 )
 
 var LastEmotion *Emotion
+
 type Emotion struct {
 	UserName   string  `json:username`
 	Article    string  `json:article`
@@ -30,6 +31,7 @@ type Calender struct {
 	Day   int `json:day`
 	EmotionNum int `json:emotionNum`
 	ColorCode int `json:colorcode`
+	Article string `json:article`
 }
 
 func getColor(f float32) int {
@@ -243,6 +245,7 @@ func postforexample(c *gin.Context){
 
 
 func getCalender(c *gin.Context){
+	Color := []int{0x9999ff,0x99ccff,0x99ffff,0x99ffcc,0x99ff99,0xccff99,0xffff99,0xffcc99,0xff9999}
 	username := c.Param("name")
 	db, err := sql.Open("sqlite3", "./test.db")
 	defer db.Close()
@@ -270,7 +273,8 @@ func getCalender(c *gin.Context){
 			Month : month,
 			Day: day,
 			EmotionNum: emotionNum,
-			ColorCode: colorCode,
+			ColorCode: Color[emotionNum],
+			Article: article,
 		}
 		calenders = append(calenders,calender)
 	}
