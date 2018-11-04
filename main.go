@@ -11,7 +11,6 @@ import (
 	"database/sql"
 	"strconv"
 	"math/rand"
-	"fmt"
 )
 
 var LastEmotion *Emotion
@@ -175,8 +174,7 @@ func getCalenderTest(c *gin.Context) {
 	calender = append(calender, calender1)
 	calender = append(calender, calender2)
 	calender = append(calender, calender3)
-	//b, _ := json.Marshal(calender)
-	//fmt.Printf("%s\n",b)
+
 	c.JSON(200, calender)
 }
 
@@ -246,7 +244,6 @@ func postforexample(c *gin.Context){
 
 func getCalender(c *gin.Context){
 	username := c.Param("name")
-	fmt.Println(username)
 	db, err := sql.Open("sqlite3", "./test.db")
 	defer db.Close()
 	if err !=  nil{
