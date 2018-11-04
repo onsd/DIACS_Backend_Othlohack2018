@@ -74,6 +74,7 @@ func main() {
 	router.POST("/postforexample",postforexample)
 	router.GET("/getCalender/:name",getCalender)
 	router.GET("/lastState",getLastState)
+	router.GET("/getDemoCalender/",getDemoCalender)
 	router.Run(":8080")
 }
 func CORSMiddleware() gin.HandlerFunc {
@@ -284,4 +285,40 @@ func getCalender(c *gin.Context){
 
 func getLastState(c *gin.Context){
 	c.JSON(200,LastEmotion)
+}
+
+func getDemoCalender(c *gin.Context){
+	username := c.Param("name")
+	Color := []int{0xB2EBF2,0xB2DFDB,0xC8E6C9,0xDCEDC8,0xF0F4C3,0xFFF9C4,0xFFECB3,0xFFE0B2,0xFFCCBC}
+	db, err := sql.Open("sqlite3", "./test.db")
+	defer db.Close()
+	if err !=  nil{
+		log.Fatalf("Open sqlite3 Error: %v",err)
+	}
+	rows, _ := db.Query("SELECT * FROM DAIRY WHERE user = ? and month = ?",username,10)
+	defer rows.Close()
+	var calenders []Calender
+	for rows.Next(){
+		var day int
+		var emotionNum int
+		var user string
+		var month int
+		var article string
+		var colorCode int
+		var year int
+		if err := rows.Scan(&user,&year,&month,&day,&article,&emotionNum,&colorCode);err != nil{
+			log.Fatal("rows.Scan()",err)
+			return
+		}
+		calender := Calender{
+			Month : month,
+			Day: day,
+			EmotionNum: emotionNum,
+			ColorCode: Color[emotionNum],
+			Article: article,
+		}
+		calenders = append(calenders,calender)
+	}
+	c.JSON(200,calenders)
+
 }
